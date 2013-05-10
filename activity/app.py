@@ -4,37 +4,26 @@ from __future__ import absolute_import
 import redis
 import leaderboard
 
-from .config import Config
-from .utils import get_root_path, cached_property, import_string
+from .utils import cached_property, import_string
 
 class Activity(object):
-    default_config = dict(
-        REDIS = 'redis://:@localhost:6379/0',
-        ITEM_LOADER = None,
-        NAMESPACE = 'activity_feed',
-        AGGREGATE = False,
-        AGGREGATE_KEY = 'aggregate',
-        PAGE_SIZE = 25,
-    )
+    def __init__(self, redis='redis://:@localhost:6379/0', item_loader=None,
+            namespace='activity_feed', aggregate=False,
+            aggregate_key='aggregate', page_size=25, connection=None):
 
-    def __init__(self, import_name=None, redis_client=None):
-        self.import_name = import_name or __name__
-        self.root_path = get_root_path(self.import_name)
-        self.config = Config(self.root_path, self.default_config)
-        self._redis = redis_client
+        self._redis = connection
+        self._redis_url = redis
 
-    @property
-    def item_loader(self):
-        if not hasattr(self, '_item_loader'):
-            import_path = self.config['ITEM_LOADER']
-            self._item_loader = import_string(import_path) if import_path else None
-
-        return self._item_loader
+        self.item_loader = import_string(item_loader) if item_loader else None
+        self.namespace = namespace
+        self.aggregate = aggregate
+        self.aggregate_key = aggregate_key
+        self.page_size = page_size
 
     @cached_property
     def redis(self):
         if not self._redis:
-            self._redis = redis.StrictRedis.from_url(self.config['REDIS'])
+            self._redis = redis.StrictRedis.from_url(self._redis_url)
 
         return self._redis
 
@@ -69,10 +58,10 @@ class Activity(object):
         @return page from the activity feed for a given `user_id`.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.leaders(page, page_size=self.config['PAGE_SIZE'])
+        res = feederboard.leaders(page, page_size=self.page_size)
         return self._parse_feed_response(res)
 
     def full_feed(self, user_id, aggregate=None):
@@ -87,7 +76,7 @@ class Activity(object):
         @return the full activity feed for a given `user_id`.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
         res = feederboard.leaders(1, page_size=feederboard.total_members())
@@ -113,7 +102,7 @@ class Activity(object):
                 the `starting_timestamp` and `ending_timestamp`.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
         res = feederboard.members_from_score_range(starting_timestamp, ending_timestamp)
@@ -129,10 +118,10 @@ class Activity(object):
         :return the total number of pages in the activity feed.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         if page_size is None:
-            page_size = self.config['PAGE_SIZE']
+            page_size = self.page_size
 
         return self.feederboard_for(user_id, aggregate).total_pages_in(self.feed_key(user_id, aggregate), page_size)
 
@@ -147,7 +136,7 @@ class Activity(object):
         @return the total number of items in the activity feed.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         return self.feederboard_for(user_id, aggregate).total_members()
 
@@ -174,7 +163,7 @@ class Activity(object):
         :param aggregate: [boolean, False] Whether or not to trim the aggregate activity feed or not.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         self.feederboard_for(user_id, aggregate).remove_members_in_score_range(starting_timestamp, ending_timestamp)
 
@@ -186,7 +175,7 @@ class Activity(object):
         :param aggregate: [boolean, False] Whether or not to expire the aggregate activity feed or not.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         self.redis.expire(self.feed_key(user_id, aggregate), seconds)
 
@@ -200,7 +189,7 @@ class Activity(object):
                           aggregate activity feed or not.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         self.redis.expireat(self.feed_key(user_id, aggregate), timestamp)
 
@@ -213,7 +202,7 @@ class Activity(object):
         :param aggregate: [boolean, False] Whether to add or update the item in the aggregate feed for `user_id`.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, False)
         feederboard.rank_member(item_id, timestamp)
@@ -257,7 +246,7 @@ class Activity(object):
         :param aggregate [boolean, False] Whether or not to check the aggregate activity feed.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         if aggregate:
             feederboard_aggregate = self.feederboard_for(user_id, True)
@@ -275,15 +264,12 @@ class Activity(object):
         @return feed key.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
-
-        namespace = self.config['NAMESPACE']
-        aggregate_key = self.config['AGGREGATE_KEY']
+            aggregate = self.aggregate
 
         if aggregate:
-            return "{}:{}:{}".format(namespace, aggregate_key, user_id)
+            return "{}:{}:{}".format(self.namespace, self.aggregate_key, user_id)
 
-        return "{}:{}".format(namespace, user_id)
+        return "{}:{}".format(self.namespace, user_id)
 
     def feederboard_for(self, user_id, aggregate=None):
         """Retrieve a reference to the activity feed for a given `user_id`.
@@ -294,7 +280,7 @@ class Activity(object):
         @return reference to the activity feed for a given `user_id`.
         """
         if aggregate is None:
-            aggregate = self.config['AGGREGATE']
+            aggregate = self.aggregate
 
         return leaderboard.Leaderboard(self.feed_key(user_id, aggregate),
             connection=self.redis)

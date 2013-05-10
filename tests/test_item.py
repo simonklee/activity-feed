@@ -12,7 +12,7 @@ class ItemTest(unittest.TestCase):
 
     def _empty(self):
         a = Activity()
-        keys = a.redis.keys('{}*'.format(a.config['NAMESPACE']))
+        keys = a.redis.keys('{}*'.format(a.namespace))
 
         if keys:
             a.redis.delete(*keys)
@@ -97,8 +97,7 @@ class ItemTest(unittest.TestCase):
 
     def check_item_test(self):
         'should return whether or not an item exists in the feed'
-        a = Activity()
-        a.config['AGGREGATE'] = False
+        a = Activity(aggregate=False)
 
         self.assertEqual(a.check_item('david', 1), False)
         a.add_item('david', 1, datetime_to_timestamp(utcnow()))
@@ -106,8 +105,7 @@ class ItemTest(unittest.TestCase):
 
     def check_item_aggregation_test(self):
         'should return whether or not an item exists in the feed'
-        a = Activity()
-        a.config['AGGREGATE'] = True
+        a = Activity(aggregate=True)
 
         self.assertEqual(a.check_item('david', 1, True), False)
         a.add_item('david', 1, datetime_to_timestamp(utcnow()))

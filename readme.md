@@ -10,6 +10,7 @@ port in progress of https://github.com/agoragames/activity_feed
 TODO:
 
 - Add readme
+- Cleanup
 - Add/port missing tests.
     + item_loader
     + configuration

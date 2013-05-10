@@ -17,7 +17,7 @@ class FeedTest(unittest.TestCase):
 
     def _empty(self):
         a = Activity()
-        keys = a.redis.keys('{}*'.format(a.config['NAMESPACE']))
+        keys = a.redis.keys('{}*'.format(a.namespace))
 
         if keys:
             a.redis.delete(*keys)
@@ -28,7 +28,7 @@ class FeedTest(unittest.TestCase):
         :param items_to_add: [int] Number of items to add to the feed.
         """
         if aggregate is None:
-            aggregate = self.a.config['AGGREGATE']
+            aggregate = self.a.aggregate
 
         timestamp = datetime_to_timestamp(utcnow())
 
