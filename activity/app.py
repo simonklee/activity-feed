@@ -5,7 +5,7 @@ import redis
 import leaderboard
 
 from .config import Config
-from .utils import get_root_path, cached_property
+from .utils import get_root_path, cached_property, import_string
 
 class Activity(object):
     default_config = dict(
@@ -23,6 +23,14 @@ class Activity(object):
         self.config = Config(self.root_path, self.default_config)
         self._redis = redis_client
 
+    @property
+    def item_loader(self):
+        if not hasattr(self, '_item_loader'):
+            import_path = self.config['ITEM_LOADER']
+            self._item_loader = import_string(import_path) if import_path else None
+
+        return self._item_loader
+
     @cached_property
     def redis(self):
         if not self._redis:
@@ -30,7 +38,23 @@ class Activity(object):
 
         return self._redis
 
-    def feed(self, user_id, page, aggregate = None):
+    def _parse_feed_response(self, res):
+        feed = []
+
+        # TODO: fetch many items at once optimization
+        for o in res:
+            if self.item_loader:
+                item = self.item_loader(o['member'])
+            else:
+                item = o['member']
+
+
+            if not item is None:
+                feed.append(item)
+
+        return feed
+
+    def feed(self, user_id, page, aggregate=None):
         """Retrieve a page from the activity feed for a given `user_id`. You
         can configure `ActivityFeed.item_loader` with a Proc to retrieve an
         item from, for example, your ORM (e.g. ActiveRecord) or your ODM (e.g.
@@ -47,22 +71,11 @@ class Activity(object):
         if aggregate is None:
             aggregate = self.config['AGGREGATE']
 
-#feederboard = ActivityFeed.feederboard_for(user_id, aggregate)
-#  feed = feederboard.leaders(page, :page_size => ActivityFeed.page_size).inject([]) do |feed_items, feed_item|
-#    item = if ActivityFeed.item_loader
-#      ActivityFeed.item_loader.call(feed_item[:member])
-#    else
-#      feed_item[:member]
-#    end
-#
-#    feed_items << item unless item.nil?
-#    feed_items
-#  end
-#
-#  feed.nil? ? [] : feed
+        feederboard = self.feederboard_for(user_id, aggregate)
+        res = feederboard.leaders(page, page_size=self.config['PAGE_SIZE'])
+        return self._parse_feed_response(res)
 
-
-    def full_feed(self, user_id, aggregate = None):
+    def full_feed(self, user_id, aggregate=None):
         """Retrieve the entire activity feed for a given `user_id`. You can configure
         `ActivityFeed.item_loader` with a Proc to retrieve an item from, for example,
         your ORM (e.g. ActiveRecord) or your ODM (e.g. Mongoid), and have the page
@@ -76,22 +89,12 @@ class Activity(object):
         if aggregate is None:
             aggregate = self.config['AGGREGATE']
 
-  #feederboard = ActivityFeed.feederboard_for(user_id, aggregate)
-  #feed = feederboard.leaders(1, :page_size => feederboard.total_members).inject([]) do |feed_items, feed_item|
-  #  item = if ActivityFeed.item_loader
-  #    ActivityFeed.item_loader.call(feed_item[:member])
-  #  else
-  #    feed_item[:member]
-  #  end
-
-  #  feed_items << item unless item.nil?
-  #  feed_items
-  #end
-
-  #feed.nil? ? [] : feed
+        feederboard = self.feederboard_for(user_id, aggregate)
+        res = feederboard.leaders(1, page_size=feederboard.total_members())
+        return self._parse_feed_response(res)
 
     def feed_between_timestamps(self, user_id, starting_timestamp,
-            ending_timestamp, aggregate = None):
+            ending_timestamp, aggregate=None):
         """Retrieve a page from the activity feed for a given `user_id` between a
         `starting_timestamp` and an `ending_timestamp`. You can configure
         `ActivityFeed.item_loader` with a Proc to retrieve an item from, for
@@ -107,24 +110,14 @@ class Activity(object):
                            aggregate feed for `user_id`.
 
         :return feed items from the activity feed for a given `user_id` between
-        the `starting_timestamp` and `ending_timestamp`.
+                the `starting_timestamp` and `ending_timestamp`.
         """
         if aggregate is None:
             aggregate = self.config['AGGREGATE']
 
-      #feederboard = ActivityFeed.feederboard_for(user_id, aggregate)
-      #feed = feederboard.members_from_score_range(starting_timestamp, ending_timestamp).inject([]) do |feed_items, feed_item|
-      #  item = if ActivityFeed.item_loader
-      #    ActivityFeed.item_loader.call(feed_item[:member])
-      #  else
-      #    feed_item[:member]
-      #  end
-
-      #  feed_items << item unless item.nil?
-      #  feed_items
-      #end
-
-      #feed.nil? ? [] : feed
+        feederboard = self.feederboard_for(user_id, aggregate)
+        res = feederboard.members_from_score_range(starting_timestamp, ending_timestamp)
+        return self._parse_feed_response(res)
 
     def total_pages_in_feed(self, user_id, aggregate = None, page_size = None):
         """Return the total number of pages in the activity feed.
@@ -139,8 +132,9 @@ class Activity(object):
             aggregate = self.config['AGGREGATE']
 
         if page_size is None:
-            page_size = self.page_size
-      #ActivityFeed.feederboard_for(user_id, aggregate).total_pages_in(ActivityFeed.feed_key(user_id, aggregate), page_size)
+            page_size = self.config['PAGE_SIZE']
+
+        return self.feederboard_for(user_id, aggregate).total_pages_in(self.feed_key(user_id, aggregate), page_size)
 
     total_pages = total_pages_in_feed
 
@@ -155,7 +149,7 @@ class Activity(object):
         if aggregate is None:
             aggregate = self.config['AGGREGATE']
 
-      #ActivityFeed.feederboard_for(user_id, aggregate).total_members
+        return self.feederboard_for(user_id, aggregate).total_members()
 
     total_items = total_items_in_feed
 
@@ -164,11 +158,11 @@ class Activity(object):
 
         :param user_id [String] User ID.
         """
-      #ActivityFeed.redis.multi do |transaction|
-      #  transaction.del(ActivityFeed.feed_key(user_id, False))
-      #  transaction.del(ActivityFeed.feed_key(user_id, True))
-      #end
-
+        pipe = self.redis.pipeline()
+        pipe.multi()
+        pipe.delete(self.feed_key(user_id, False))
+        pipe.delete(self.feed_key(user_id, True))
+        pipe.execute()
 
     def trim_feed(self, user_id, starting_timestamp, ending_timestamp,
             aggregate = None):
@@ -182,8 +176,7 @@ class Activity(object):
         if aggregate is None:
             aggregate = self.config['AGGREGATE']
 
-        #ActivityFeed.feederboard_for(user_id, aggregate).remove_members_in_score_range(starting_timestamp, ending_timestamp)
-
+        self.feederboard_for(user_id, aggregate).remove_members_in_score_range(starting_timestamp, ending_timestamp)
 
     def expire_feed(self, user_id, seconds, aggregate = None):
         """Expire an activity feed after a set number of seconds.
@@ -195,7 +188,7 @@ class Activity(object):
         if aggregate is None:
             aggregate = self.config['AGGREGATE']
 
-        #ActivityFeed.redis.expire(ActivityFeed.feed_key(user_id, aggregate), seconds)
+        self.redis.expire(self.feed_key(user_id, aggregate), seconds)
 
     def expire_feed_at(self, user_id, timestamp, aggregate=None):
         """Expire an activity feed at a given timestamp.
