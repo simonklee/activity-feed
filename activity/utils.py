@@ -1,7 +1,8 @@
+import datetime
 import os
+import pkgutil
 import sys
 import time
-import pkgutil
 
 try:
     from IPython.core.debugger import Pdb, BdbQuit_excepthook
@@ -35,6 +36,26 @@ def safe_bytestr(s):
         return str(s)
     except UnicodeEncodeError:
         return unicode(s).encode('utf-8')
+
+def datetime_to_timestamp(v):
+    "Converts a Python datetime object to a unix timestamp"
+    return int(time.mktime(v.timetuple()))
+
+def timestamp_to_utc(v):
+    "Converts a unix timestamp to a Python datetime object"
+    if not v:
+        return None
+    try:
+        v = int(v)
+    except ValueError:
+        return None
+    return datetime.datetime.utcfromtimestamp(v)
+
+def utcnow():
+    '''Returns a UTC datetime.datetime.utcnow object with
+    microseconds removed.
+    '''
+    return datetime.datetime.utcnow().replace(microsecond=0)
 
 # Copyright (c) 2013 by Armin Ronacher and contributors.
 #
@@ -181,6 +202,9 @@ def get_root_path(import_name):
 
     # filepath is import_name.py for a module, or __init__.py for a package.
     return os.path.dirname(os.path.abspath(filepath))
+
+# sentinel
+_missing = object()
 
 class cached_property(object):
     """A decorator that converts a function into a lazy property.  The
