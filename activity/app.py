@@ -297,4 +297,4 @@ class Activity(object):
             aggregate = self.aggregate
 
         return leaderboard.Leaderboard(self.feed_key(user_id, aggregate),
-            connection=self.redis)
+            connection_pool=self.redis.connection_pool)

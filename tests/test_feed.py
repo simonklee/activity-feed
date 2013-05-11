@@ -1,41 +1,13 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import
 
-import unittest
 import datetime
 import leaderboard
+from .helper import BaseTest, timestamp
 
-from activity import Activity
-from activity.utils import datetime_to_timestamp, utcnow
+from activity.utils import datetime_to_timestamp
 
-def timestamp(*args):
-    return datetime_to_timestamp(datetime.datetime(*args))
-
-class FeedTest(unittest.TestCase):
-    def setUp(self):
-        self._empty()
-        self.a = Activity()
-
-    def _empty(self):
-        a = Activity()
-        keys = a.redis.keys('{}*'.format(a.namespace))
-
-        if keys:
-            a.redis.delete(*keys)
-
-    def add_items_to_feed(self, user_id, items_to_add=5, aggregate=None):
-        """Helper method to add items to a given feed.
-
-        :param items_to_add: [int] Number of items to add to the feed.
-        """
-        if aggregate is None:
-            aggregate = self.a.aggregate
-
-        timestamp = datetime_to_timestamp(utcnow())
-
-        for i in range(1, items_to_add + 1):
-            self.a.update_item(user_id, i, timestamp, aggregate)
-            timestamp += 5
-
+class FeedTest(BaseTest):
     def feed_test(self):
         'should return an activity feed with the items correctly ordered'
         self.add_items_to_feed('david')
