@@ -3,6 +3,7 @@ from __future__ import absolute_import
 
 import redis
 import leaderboard
+import itertools
 
 from .utils import cached_property, import_string
 
@@ -14,11 +15,18 @@ class Activity(object):
         self._redis = connection
         self._redis_url = redis
 
-        self.item_loader = import_string(item_loader) if item_loader else None
+        if isinstance(item_loader, basestring):
+            self.item_loader = import_string(item_loader)
+        if callable(item_loader):
+            self.item_loader = item_loader
+        else:
+            self.item_loader = None
+
         self.namespace = namespace
         self.aggregate = aggregate
         self.aggregate_key = aggregate_key
         self.page_size = page_size
+        self.members_only = False
 
     @cached_property
     def redis(self):
@@ -28,9 +36,14 @@ class Activity(object):
         return self._redis
 
     def _parse_feed_response(self, res):
-        feed = []
-
         # TODO: fetch many items at once optimization
+        if self.members_only:
+            if self.item_loader:
+                return list(itertools.imap(self.item_loader, res))
+
+            return res
+
+        feed = []
         for o in res:
             if self.item_loader:
                 item = self.item_loader(o['member'])
@@ -60,7 +73,7 @@ class Activity(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.leaders(page, page_size=self.page_size)
+        res = feederboard.leaders(page, page_size=self.page_size, members_only=self.members_only)
         return self._parse_feed_response(res)
 
     def full_feed(self, user_id, aggregate=None):
@@ -79,7 +92,7 @@ class Activity(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.leaders(1, page_size=feederboard.total_members())
+        res = feederboard.leaders(1, page_size=feederboard.total_members(), members_only=self.members_only)
         return self._parse_feed_response(res)
 
     def feed_between_timestamps(self, user_id, starting_timestamp,
@@ -105,7 +118,7 @@ class Activity(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.members_from_score_range(starting_timestamp, ending_timestamp)
+        res = feederboard.members_from_score_range(starting_timestamp, ending_timestamp, members_only=self.members_only)
         return self._parse_feed_response(res)
 
     def total_pages_in_feed(self, user_id, aggregate = None, page_size = None):
