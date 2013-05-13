@@ -14,7 +14,7 @@ TODO:
 ## Installation
 
 Activity requires a Redis server. See
-[http://redis.io/topics/quickstart](Redis's quickstart) for
+[Redis's quickstart](http://redis.io/topics/quickstart) for
 installation instructions.
 
 To install Activity:
