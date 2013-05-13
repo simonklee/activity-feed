@@ -30,7 +30,7 @@ items = {}
 def example_setup():
     a = Activity(
         redis='redis://:@localhost:6379/15',
-        item_loader=get_item,
+        #item_loader=get_item,
         aggregate=True)
 
     _empty(a)

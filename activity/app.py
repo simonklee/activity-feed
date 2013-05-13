@@ -9,24 +9,33 @@ from .utils import cached_property, import_string
 
 class Activity(object):
     def __init__(self, redis='redis://:@localhost:6379/0', item_loader=None,
-            namespace='activity_feed', aggregate=False,
+            items_loader=None, namespace='activity_feed', aggregate=False,
             aggregate_key='aggregate', page_size=25, connection=None):
 
         self._redis = connection
         self._redis_url = redis
-
-        if isinstance(item_loader, basestring):
-            self.item_loader = import_string(item_loader)
-        if callable(item_loader):
-            self.item_loader = item_loader
-        else:
-            self.item_loader = None
-
+        self._resolve_item_loaders(item_loader, items_loader)
         self.namespace = namespace
         self.aggregate = aggregate
         self.aggregate_key = aggregate_key
         self.page_size = page_size
-        self.members_only = False
+        self.members_only = True
+
+    def _resolve_item_loaders(self, item_loader=None, items_loader=None):
+        '''Sets the item loader callback functions.'''
+        def resolve_loader(loader):
+            if isinstance(loader, basestring):
+                return import_string(loader)
+            if callable(loader):
+                return loader
+            else:
+                return None
+
+        self.items_loader = resolve_loader(items_loader)
+        self.item_loader = resolve_loader(items_loader)
+
+        if self.items_loader and not self.item_loader:
+            self.item_loader = lambda x: self.items_loader([x])
 
     @cached_property
     def redis(self):
@@ -36,9 +45,10 @@ class Activity(object):
         return self._redis
 
     def _parse_feed_response(self, res):
-        # TODO: fetch many items at once optimization
         if self.members_only:
-            if self.item_loader:
+            if self.items_loader:
+                return self.item_loader(res)
+            elif self.item_loader:
                 return list(itertools.imap(self.item_loader, res))
 
             return res
