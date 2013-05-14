@@ -32,10 +32,10 @@ class Activity(object):
                 return None
 
         self.items_loader = resolve_loader(items_loader)
-        self.item_loader = resolve_loader(items_loader)
+        item_loader = resolve_loader(item_loader)
 
-        if self.items_loader and not self.item_loader:
-            self.item_loader = lambda x: self.items_loader([x])
+        if not self.items_loader and item_loader:
+            self.items_loader = lambda res: [item_loader(v) for v in res]
 
     @cached_property
     def redis(self):
@@ -46,12 +46,12 @@ class Activity(object):
 
     def _parse_feed_response(self, res):
         if self.members_only:
-            if self.items_loader:
-                return self.item_loader(res)
-            elif self.item_loader:
-                return list(itertools.imap(self.item_loader, res))
+            items = [v['member'] for v in res]
 
-            return res
+            if self.items_loader:
+                return self.items_loader(items)
+
+            return items
 
         feed = []
         for o in res:
