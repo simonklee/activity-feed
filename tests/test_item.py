@@ -39,6 +39,22 @@ class ItemTest(BaseTest):
         self.assertEqual(self.a.redis.exists(self.a.feed_key('david')), True)
         self.assertEqual(self.a.redis.exists(self.a.feed_key('david', True)), True)
 
+    def aggregate_item_test(self):
+        'should correctly build an activity feed'
+        self.assertEqual(self.a.redis.exists(self.a.feed_key('david', True)), False)
+
+        now = timestamp_utcnow()
+        self.a.aggregate_item('david', 1, now)
+        self.assertEqual(self.a.redis.exists(self.a.feed_key('david')), False)
+        self.assertEqual(self.a.redis.exists(self.a.feed_key('david', True)), True)
+
+        now = timestamp_utcnow()
+        self.a.aggregate_item(('luke', 'jonathan'), 1, now)
+        self.assertEqual(self.a.redis.exists(self.a.feed_key('luke')), False)
+        self.assertEqual(self.a.redis.exists(self.a.feed_key('luke', True)), True)
+        self.assertEqual(self.a.redis.exists(self.a.feed_key('jonathan')), False)
+        self.assertEqual(self.a.redis.exists(self.a.feed_key('jonathan', True)), True)
+
     def remove_item_test(self):
         'should remove an item from an activity feed'
         self.assertEqual(self.a.redis.exists(self.a.feed_key('david')), False)

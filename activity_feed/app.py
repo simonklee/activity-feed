@@ -246,11 +246,11 @@ class ActivityFeed(object):
             pipeline = self.redis.pipeline()
 
             for uid in user_id:
-                pipeline.zadd(self.feed_key(uid, True), timestamp, uid)
+                pipeline.zadd(self.feed_key(uid, True), timestamp, item_id)
 
             pipeline.execute()
         else:
-            self.redis.zadd(self.feed_key(user_id, True), timestamp, user_id)
+            self.redis.zadd(self.feed_key(user_id, True), timestamp, item_id)
 
     def remove_item(self, user_id, item_id):
         """Remove an item from the activity feed for a given `user_id`. This

@@ -42,7 +42,6 @@ class FeedTest(BaseTest):
         self.assertEqual(int(feed[0]), 30)
         self.assertEqual(int(feed[29]), 1)
 
-
     def feed_between_timestamps_test(self):
         '''Should return activity feed items between the starting and ending
         timestamps.'''
