@@ -15,7 +15,9 @@ setup(
     license='MIT',
     keywords="redis",
     packages=find_packages(exclude=['tests']),
-    install_requires=['redis', 'leaderboard'],
+    install_requires=[
+        'redis',
+        'leaderboard >= 2.3.0'],
     zip_safe=True,
     test_suite="nose.collector",
     tests_require=['nose'],

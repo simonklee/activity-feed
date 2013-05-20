@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-import redis
 import leaderboard
 
 from .utils import cached_property, import_string
+from .connection import redis_from_url
 
 class ActivityFeed(object):
     def __init__(self, redis='redis://:@localhost:6379/0', item_loader=None,
@@ -18,7 +18,6 @@ class ActivityFeed(object):
         self.aggregate = aggregate
         self.aggregate_key = aggregate_key
         self.page_size = page_size
-        self.members_only = True
 
     def _resolve_item_loaders(self, item_loader=None, items_loader=None):
         '''Sets the item loader callback functions.'''
@@ -39,30 +38,17 @@ class ActivityFeed(object):
     @cached_property
     def redis(self):
         if not self._redis:
-            self._redis = redis.StrictRedis.from_url(self._redis_url)
+            self._redis = redis_from_url(self._redis_url)
 
         return self._redis
 
     def _parse_feed_response(self, res):
-        if self.members_only:
-            items = [v['member'] for v in res]
+        items = [v['member'] for v in res]
 
-            if self.items_loader:
-                return self.items_loader(items)
+        if self.items_loader:
+            return self.items_loader(items)
 
-            return items
-
-        feed = []
-        for o in res:
-            if self.item_loader:
-                item = self.item_loader(o['member'])
-            else:
-                item = o['member']
-
-            if not item is None:
-                feed.append(item)
-
-        return feed
+        return items
 
     def feed(self, user_id, page, aggregate=None):
         """Retrieve a page from the activity feed for a given `user_id`. You
@@ -82,7 +68,7 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.leaders(page, page_size=self.page_size, members_only=self.members_only)
+        res = feederboard.leaders(page, page_size=self.page_size, members_only=True)
         return self._parse_feed_response(res)
 
     def full_feed(self, user_id, aggregate=None):
@@ -101,7 +87,7 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.leaders(1, page_size=feederboard.total_members(), members_only=self.members_only)
+        res = feederboard.leaders(1, page_size=feederboard.total_members(), members_only=True)
         return self._parse_feed_response(res)
 
     def feed_between_timestamps(self, user_id, starting_timestamp,
@@ -127,7 +113,7 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.members_from_score_range(starting_timestamp, ending_timestamp, members_only=self.members_only)
+        res = feederboard.members_from_score_range(starting_timestamp, ending_timestamp, members_only=True)
         return self._parse_feed_response(res)
 
     def total_pages_in_feed(self, user_id, aggregate = None, page_size = None):
@@ -252,12 +238,19 @@ class ActivityFeed(object):
         This is useful if you are going to background the process of populating
         a user's activity feed from friend's activities.
 
-        :param user_id: [string] User ID.
+        :param user_id: [string] User ID or a list/tuple of User IDs
         :param item_id: [string] Item ID.
         :param timestamp: [int] Timestamp for the item being added or updated.
         """
-        feederboard = self.feederboard_for(user_id, True)
-        feederboard.rank_member(item_id, timestamp)
+        if not isinstance(user_id, basestring) and getattr(user_id, '__iter__', False):
+            pipeline = self.redis.pipeline()
+
+            for uid in user_id:
+                pipeline.zadd(self.feed_key(uid, True), timestamp, uid)
+
+            pipeline.execute()
+        else:
+            self.redis.zadd(self.feed_key(user_id, True), timestamp, user_id)
 
     def remove_item(self, user_id, item_id):
         """Remove an item from the activity feed for a given `user_id`. This

@@ -45,14 +45,14 @@ def example_setup():
 
     _empty(a)
 
-    now = timestamp_utcnow()
+    #now = timestamp_utcnow()
 
-    for i in range(1, 1200, 2):
-        create_item(a, 'foo', i, now)
-        now += 5
-        create_item(a, 'bar', i+1, now)
-        a.aggregate_item('foo', i+1, now)
-        now += 5
+    #for i in range(1, 1200, 2):
+    #    create_item(a, 'foo', i, now)
+    #    now += 5
+    #    create_item(a, 'bar', i+1, now)
+    #    a.aggregate_item('foo', i+1, now)
+    #    now += 5
 
     return a
 
@@ -60,8 +60,21 @@ def example_run():
     for i in range(1, 1200):
         a.feed('foo', 1)
 
+_id = 0
+now = timestamp_utcnow()
+friends_count = 1
+
 def example_timeit_run():
-    a.feed('foo', 1)
+    #a.feed('foo', 1)
+
+    global _id, now, friends_count
+    _id += 1
+    now += 1
+
+    create_item(a, 'foo', _id, now)
+
+    friends = ('friend_%d' % i for i in xrange(friends_count))
+    a.aggregate_item(friends, _id, now)
 
 def format_time(seconds):
     v = seconds
@@ -74,7 +87,7 @@ def format_time(seconds):
         v = int(round(v*1000*1000))
     elif v * 1000 < 1000:
         scale = u'ms'
-        v = int(round(v*1000))
+        v = round(v*1000, 4)
     else:
         scale = u'sec'
         v = int(v)
@@ -86,9 +99,12 @@ if __name__ == '__main__':
     parser.add_argument('--profile', action='store_true', help='run profiler')
     parser.add_argument('--graph', action='store_true', help='run graph')
     parser.add_argument('--timeit', type=int, default=0, help='run benchmark')
+    parser.add_argument('--friends-count', type=int, default=1, help='friends count')
 
     args = parser.parse_args()
     a = example_setup()
+    global frinds_count
+    friends_count = args.friends_count
 
     if args.profile:
         pr = cProfile.Profile()
@@ -104,8 +120,10 @@ if __name__ == '__main__':
         per_loop = min_run/number
         print u'{} total run'.format(format_time(min_run))
         print u'{} per/loop'.format(format_time(per_loop))
+        print u'{} per/friend'.format(format_time(per_loop/friends_count))
     else:
-        example_run()
+        for _ in xrange(100):
+            example_timeit_run()
 
     if args.graph:
         pycallgraph.make_dot_graph('example.png')
