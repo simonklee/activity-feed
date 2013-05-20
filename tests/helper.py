@@ -2,8 +2,8 @@ import unittest
 
 import datetime
 
-from activity import Activity
-from activity.utils import datetime_to_timestamp, utcnow
+from activity_feed import ActivityFeed
+from activity_feed.utils import datetime_to_timestamp, utcnow
 
 def timestamp(*args):
     return datetime_to_timestamp(datetime.datetime(*args))
@@ -13,7 +13,7 @@ def timestamp_utcnow():
 
 class BaseTest(unittest.TestCase):
     def setUp(self):
-        self.a = Activity(redis='redis://:@localhost:6379/15')
+        self.a = ActivityFeed(redis='redis://:@localhost:6379/15')
         self._empty()
 
     def _empty(self):

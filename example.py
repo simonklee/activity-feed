@@ -6,8 +6,8 @@ import pycallgraph
 import timeit
 import time
 
-from activity import Activity
-from activity.utils import datetime_to_timestamp, utcnow, s
+from activity_feed import ActivityFeed
+from activity_feed.utils import datetime_to_timestamp, utcnow
 
 def timestamp_utcnow():
     return datetime_to_timestamp(utcnow())
@@ -38,7 +38,7 @@ items = {}
 
 def example_setup():
     global a
-    a = Activity(
+    a = ActivityFeed(
         redis='redis://:@localhost:6379/15',
         items_loader=items_loader,
         aggregate=True)

@@ -3,11 +3,10 @@ from __future__ import absolute_import
 
 import redis
 import leaderboard
-import itertools
 
 from .utils import cached_property, import_string
 
-class Activity(object):
+class ActivityFeed(object):
     def __init__(self, redis='redis://:@localhost:6379/0', item_loader=None,
             items_loader=None, namespace='activity_feed', aggregate=False,
             aggregate_key='aggregate', page_size=25, connection=None):

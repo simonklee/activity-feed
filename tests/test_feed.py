@@ -5,7 +5,7 @@ import datetime
 import leaderboard
 from .helper import BaseTest, timestamp
 
-from activity.utils import datetime_to_timestamp
+from activity_feed.utils import datetime_to_timestamp
 
 class FeedTest(BaseTest):
     def feed_test(self):
