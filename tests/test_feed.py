@@ -158,7 +158,7 @@ class FeedTest(BaseTest):
         self.assertEqual(int(feed[0]), 5)
         self.assertEqual(int(feed[1]), 1)
 
-    def trim_feed_size_test(self):
+    def trim_feed_to_size_test(self):
         '''should trim activity feed down to a size'''
         page_size = leaderboard.Leaderboard.DEFAULT_PAGE_SIZE
         self.add_items_to_feed('david', page_size)
@@ -171,6 +171,25 @@ class FeedTest(BaseTest):
         self.a.trim_feed_to_size('david', 10)
 
         feed = self.a.feed('david', 1)
+        self.assertEqual(len(feed), 10)
+        self.assertEqual(int(feed[0]), 25)
+        self.assertEqual(int(feed[9]), 16)
+
+    def trim_feed_to_size_aggregation_test(self):
+        '''should trim activity feed down to a size'''
+        page_size = leaderboard.Leaderboard.DEFAULT_PAGE_SIZE
+        self.add_items_to_feed('david', page_size, True)
+
+        feed = self.a.feed('david', 1, True)
+        self.assertEqual(len(feed), 25)
+        self.assertEqual(int(feed[0]), 25)
+        self.assertEqual(int(feed[24]), 1)
+
+        self.a.trim_feed_to_size('david', 10)
+        self.a.trim_feed_to_size('david', 10, True)
+
+        self.assertEqual(len(self.a.feed('david', 1)), 10)
+        feed = self.a.feed('david', 1, True)
         self.assertEqual(len(feed), 10)
         self.assertEqual(int(feed[0]), 25)
         self.assertEqual(int(feed[9]), 16)
