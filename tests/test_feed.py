@@ -168,7 +168,7 @@ class FeedTest(BaseTest):
         self.assertEqual(int(feed[0]), 25)
         self.assertEqual(int(feed[24]), 1)
 
-        self.a.trim_feed_to_size('david', 10)
+        self.assertEqual(self.a.trim_feed_to_size('david', 10), 15)
 
         feed = self.a.feed('david', 1)
         self.assertEqual(len(feed), 10)
@@ -185,8 +185,8 @@ class FeedTest(BaseTest):
         self.assertEqual(int(feed[0]), 25)
         self.assertEqual(int(feed[24]), 1)
 
-        self.a.trim_feed_to_size('david', 10)
-        self.a.trim_feed_to_size('david', 10, True)
+        self.assertEqual(self.a.trim_feed_to_size('david', 10), 15)
+        self.assertEqual(self.a.trim_feed_to_size('david', 10, True), 15)
 
         self.assertEqual(len(self.a.feed('david', 1)), 10)
         feed = self.a.feed('david', 1, True)

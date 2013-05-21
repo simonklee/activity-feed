@@ -196,7 +196,7 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         feed = self.feederboard_for(user_id, aggregate)
-        feed.remove_members_outside_rank(size)
+        return feed.remove_members_outside_rank(size)
 
     def expire_feed(self, user_id, seconds, aggregate = None):
         """Expire an activity feed after a set number of seconds.
