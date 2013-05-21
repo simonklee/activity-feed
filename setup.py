@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='activity',
-    version='2.3.0',
+    version='2.4.0',
     description='Activity feeds backed by Redis',
     long_description=codecs.open('readme.md', "r", "utf-8").read(),
     author='Simon Zimmermann',
