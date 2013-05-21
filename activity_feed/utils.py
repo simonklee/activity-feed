@@ -57,6 +57,10 @@ def utcnow():
     '''
     return datetime.datetime.utcnow().replace(microsecond=0)
 
+def isiterable(v):
+    '''check if v is iterable, but not a string'''
+    return not isinstance(v, basestring) and getattr(v, '__iter__', False)
+
 # Copyright (c) 2013 by Armin Ronacher and contributors.
 #
 # Some rights reserved.

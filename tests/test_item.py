@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from .helper import BaseTest, timestamp_utcnow
+from tests.helper import BaseTest, timestamp_utcnow
 
 class ItemTest(BaseTest):
     def update_item_test(self):
@@ -69,6 +69,12 @@ class ItemTest(BaseTest):
 
         self.assertEqual(self.a.redis.zcard(self.a.feed_key('david')), 0)
 
+        self.a.update_item('david', 1, timestamp_utcnow())
+        self.a.update_item('david', 2, timestamp_utcnow())
+        self.a.remove_item('david', (1, 2))
+
+        self.assertEqual(self.a.redis.zcard(self.a.feed_key('david')), 0)
+
     def remove_item_aggregation_test(self):
         'should remove an item from an activity feed and the aggregate feed'
         self.assertEqual(self.a.redis.exists(self.a.feed_key('david')), False)
@@ -84,6 +90,13 @@ class ItemTest(BaseTest):
         self.assertEqual(self.a.redis.zcard(self.a.feed_key('david', True)), 1)
 
         self.a.remove_item('david', 1)
+
+        self.assertEqual(self.a.redis.zcard(self.a.feed_key('david')), 0)
+        self.assertEqual(self.a.redis.zcard(self.a.feed_key('david', True)), 0)
+
+        self.a.update_item('david', 1, timestamp_utcnow())
+        self.a.update_item('david', 2, timestamp_utcnow())
+        self.a.remove_item('david', (1, 2))
 
         self.assertEqual(self.a.redis.zcard(self.a.feed_key('david')), 0)
         self.assertEqual(self.a.redis.zcard(self.a.feed_key('david', True)), 0)

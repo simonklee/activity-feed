@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 import leaderboard
 
-from .utils import cached_property, import_string
+from .utils import cached_property, import_string, isiterable
 from .connection import redis_from_url
 
 class ActivityFeed(object):
@@ -238,11 +238,11 @@ class ActivityFeed(object):
         This is useful if you are going to background the process of populating
         a user's activity feed from friend's activities.
 
-        :param user_id: [string] User ID or a list/tuple of User IDs
+        :param user_id: [string] User ID or an iterable of User IDs
         :param item_id: [string] Item ID.
         :param timestamp: [int] Timestamp for the item being added or updated.
         """
-        if not isinstance(user_id, basestring) and getattr(user_id, '__iter__', False):
+        if isiterable(user_id):
             pipeline = self.redis.pipeline()
 
             for uid in user_id:
@@ -258,12 +258,17 @@ class ActivityFeed(object):
         user.
 
         :param user_id: [string] User ID.
-        :param item_id: [string] Item ID.
+        :param item_id: [string] Item ID or an iterable of Item ID's.
         """
-        feederboard = self.feederboard_for(user_id, False)
-        feederboard.remove_member(item_id)
-        feederboard = self.feederboard_for(user_id, True)
-        feederboard.remove_member(item_id)
+        # TODO: Optimize removing many members
+        if not isiterable(item_id):
+            item_id = (item_id,)
+
+        for _id in item_id:
+            feederboard = self.feederboard_for(user_id, False)
+            feederboard.remove_member(_id)
+            feederboard = self.feederboard_for(user_id, True)
+            feederboard.remove_member(_id)
 
     def check_item(self, user_id, item_id, aggregate = None):
         """Check to see if an item is in the activity feed for a given `user_id`.
