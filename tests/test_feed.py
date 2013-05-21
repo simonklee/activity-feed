@@ -3,7 +3,7 @@ from __future__ import absolute_import
 
 import datetime
 import leaderboard
-from .helper import BaseTest, timestamp
+from tests.helper import BaseTest, timestamp
 
 from activity_feed.utils import datetime_to_timestamp
 
@@ -157,6 +157,23 @@ class FeedTest(BaseTest):
         self.assertEqual(len(feed), 2)
         self.assertEqual(int(feed[0]), 5)
         self.assertEqual(int(feed[1]), 1)
+
+    def trim_feed_size_test(self):
+        '''should trim activity feed down to a size'''
+        page_size = leaderboard.Leaderboard.DEFAULT_PAGE_SIZE
+        self.add_items_to_feed('david', page_size)
+
+        feed = self.a.feed('david', 1)
+        self.assertEqual(len(feed), 25)
+        self.assertEqual(int(feed[0]), 25)
+        self.assertEqual(int(feed[24]), 1)
+
+        self.a.trim_feed_to_size('david', 10)
+
+        feed = self.a.feed('david', 1)
+        self.assertEqual(len(feed), 10)
+        self.assertEqual(int(feed[0]), 25)
+        self.assertEqual(int(feed[9]), 16)
 
     def expire_feed_test(self):
         'should set an expiration on an activity feed'

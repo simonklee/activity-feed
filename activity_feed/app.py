@@ -184,6 +184,20 @@ class ActivityFeed(object):
         feed = self.feederboard_for(user_id, aggregate)
         feed.remove_members_in_score_range(starting_timestamp, ending_timestamp)
 
+    def trim_feed_to_size(self, user_id, size, aggregate = None):
+        """Trim an activity down to a certain size
+
+        :param user_id: [string] User ID.
+        :param size: [int] size of the feed we want to keep.
+        :param aggregate: [boolean, False] Whether or not to trim the aggregate
+                          activity feed or not.
+        """
+        if aggregate is None:
+            aggregate = self.aggregate
+
+        feed = self.feederboard_for(user_id, aggregate)
+        feed.remove_members_outside_rank(size)
+
     def expire_feed(self, user_id, seconds, aggregate = None):
         """Expire an activity feed after a set number of seconds.
 
