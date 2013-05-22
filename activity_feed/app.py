@@ -240,7 +240,7 @@ class ActivityFeed(object):
 
         if aggregate:
             pipe = self.redis.pipeline()
-            pipe.zadd(self.feed_key(user_id), timestamp, item_id)
+            pipe.zadd(self.feed_key(user_id, False), timestamp, item_id)
             pipe.zadd(self.feed_key(user_id, True), timestamp, item_id)
             pipe.execute()
         else:
