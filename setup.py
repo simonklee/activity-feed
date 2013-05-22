@@ -6,7 +6,7 @@ from setuptools import setup, Extension
 
 setup(
     name='activity',
-    version='2.5.2',
+    version='2.5.3',
     description='Activity feeds backed by Redis',
     long_description=codecs.open('readme.md', "r", "utf-8").read(),
     author='Simon Zimmermann',
