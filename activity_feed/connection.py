@@ -2,10 +2,10 @@ import urlparse
 import redis
 
 try:
-    import redis_packer
+    import pack_command
 
     class Connection(redis.Connection):
-        pack_command = redis_packer.pack_command
+        pack_command = pack_command.pack_command
 except ImportError:
     Connection = redis.Connection
 
