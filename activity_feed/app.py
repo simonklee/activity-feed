@@ -238,12 +238,13 @@ class ActivityFeed(object):
         if aggregate is None:
             aggregate = self.aggregate
 
-        feederboard = self.feederboard_for(user_id, False)
-        feederboard.rank_member(item_id, timestamp)
-
         if aggregate:
-            feederboard = self.feederboard_for(user_id, True)
-            feederboard.rank_member(item_id, timestamp)
+            pipe = self.redis.pipeline()
+            pipe.zadd(self.feed_key(user_id), timestamp, item_id)
+            pipe.zadd(self.feed_key(user_id, True), timestamp, item_id)
+            pipe.execute()
+        else:
+            self.redis.zadd(self.feed_key(user_id), timestamp, item_id)
 
     add_item = update_item
 
