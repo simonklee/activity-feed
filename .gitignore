@@ -1,5 +1,7 @@
 ve/
+build/
 ignore/
+dist/
 *.pyc
 *.coverage
 .noseids

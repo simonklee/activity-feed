@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 import codecs
 
-from setuptools import setup, find_packages
+from setuptools import setup, Extension
 
 setup(
     name='activity',
-    version='2.5.1',
+    version='2.5.2',
     description='Activity feeds backed by Redis',
     long_description=codecs.open('readme.md', "r", "utf-8").read(),
     author='Simon Zimmermann',
@@ -14,7 +14,10 @@ setup(
     url='http://github.com/simonz05/activity-feed',
     license='MIT',
     keywords="redis",
-    packages=find_packages(exclude=['tests']),
+    packages=['activity_feed'],
+    ext_modules=[
+        Extension('activity_feed.app', sources=['activity_feed/app.c'])
+    ],
     install_requires=[
         'redis',
         'leaderboard >= 2.3.0'],
