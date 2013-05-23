@@ -44,7 +44,10 @@ cmdclass['build_ext'] = ve_build_ext
 # Don't try to compile the extension if we're running on PyPy
 if os.path.isfile('activity_feed/_app_speedups.c') and not hasattr(sys, "pypy_translation_info"):
     speedups = Feature('optional C speed-enhancement module', standard=True,
-                       ext_modules=[Extension('activity_feed._app_speedups', ['activity_feed/_app_speedups.c'])])
+                       ext_modules=[
+                           Extension('activity_feed._utils_speedups', ['activity_feed/_utils_speedups.c']),
+                           Extension('activity_feed._app_speedups', ['activity_feed/_app_speedups.c']),
+                        ])
 else:
     speedups = None
 

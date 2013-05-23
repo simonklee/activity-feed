@@ -7,3 +7,4 @@ ve/
 .coverage
 .tox
 activity_feed/*.so
+activity_feed/*.html

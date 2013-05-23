@@ -14,11 +14,16 @@ test_setup:
 toxtest:
 	@tox
 
+activity_feed/_utils_speedups.so: activity_feed/_utils_speedups.pyx
+	cython activity_feed/_utils_speedups.pyx
+	python setup.py build
+	cp build/*/activity_feed/_utils_speedups*.so activity_feed
+	
 activity_feed/_app_speedups.so: activity_feed/_app_speedups.pyx
 	cython activity_feed/_app_speedups.pyx
 	python setup.py build
 	cp build/*/activity_feed/_app_speedups*.so activity_feed
 
-cybuild: activity_feed/_app_speedups.so
+cybuild: activity_feed/_utils_speedups.so activity_feed/_app_speedups.so 
 
 .PHONY: test clean-pyc cybuild all

@@ -31,7 +31,6 @@ def get_item(item_id):
 
 def items_loader(res):
     items = [get_item(v) for v in res]
-    time.sleep(0.002)
     return items
 
 items = {}
@@ -75,6 +74,7 @@ def example_timeit_run():
 
     friends = ('friend_%d' % i for i in xrange(friends_count))
     a.aggregate_item(friends, _id, now)
+    a.feed('foo', 1)
 
 def format_time(seconds):
     v = seconds

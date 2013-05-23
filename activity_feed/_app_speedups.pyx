@@ -3,7 +3,12 @@ from __future__ import absolute_import
 
 import leaderboard
 
-from .utils import cached_property, import_string, isiterable
+try:
+    from ._utils_speedups import isiterable
+except ImportError:
+    from .utils import isiterable
+
+from .utils import import_string, cached_property
 from .connection import redis_from_url
 
 class ActivityFeed(object):
