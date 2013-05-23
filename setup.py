@@ -55,7 +55,7 @@ def run_setup(with_binary):
 
     setup(
         name='Activity Feed',
-        version='2.5.4',
+        version='2.6.0',
         license='MIT',
         url='https://github.com/simonz05/activity-feed/',
         author='Simon Zimmermann',
