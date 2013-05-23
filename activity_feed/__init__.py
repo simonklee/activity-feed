@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
+"""
+ActivityFeed
+------------
 
-__version__ = "2.3.0"
+Activity feeds backed by Redis.
+"""
 
-from app import ActivityFeed
+__version__ = "2.5.4"
+
+try:
+    from _app_speedups import ActivityFeed
+except:
+    from _app_python import ActivityFeed
 
 __all__ = ['ActivityFeed']

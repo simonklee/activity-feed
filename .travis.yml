@@ -1,0 +1,15 @@
+language: python
+python:
+  - "2.7"
+install:
+  # this fixes SemLock issues on travis
+  - "pip install cython"
+  - "make test_setup"
+  - "python setup.py develop"
+env:
+  matrix: 
+    - COMMAND="make test"
+#    - COMMAND="make cybuild test""
+services:
+  - redis-server
+script: "$COMMAND"

@@ -1,8 +1,8 @@
+build/
+dist/
 ve/
-ignore/
 *.pyc
-*.coverage
-.noseids
-bench.py
-activity.egg-info
-req.txt
+*.egg-info/
+*.egg/
+.coverage
+.tox
