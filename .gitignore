@@ -6,3 +6,4 @@ ve/
 *.egg/
 .coverage
 .tox
+activity_feed/*.so

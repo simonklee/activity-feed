@@ -9,7 +9,7 @@ install:
 env:
   matrix: 
     - COMMAND="make test"
-#    - COMMAND="make cybuild test""
+    - COMMAND="make cybuild test""
 services:
   - redis-server
 script: "$COMMAND"
