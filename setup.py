@@ -66,7 +66,7 @@ def run_setup(with_binary):
         platforms='any',
         packages=['activity_feed'],
         dependency_links=[
-            'https://github.com/simonz05/leaderboard-python/tarball/remove_members_outside_rank'
+            'https://github.com/simonz05/leaderboard-python/tarball/remove_members_outside_rank#egg=leaderboard-2.3.0'
         ],
         install_requires=[
             'redis',
