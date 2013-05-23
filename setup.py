@@ -66,11 +66,11 @@ def run_setup(with_binary):
         platforms='any',
         packages=['activity_feed'],
         dependency_links=[
-            'https://github.com/simonz05/leaderboard-python/tarball/remove_members_outside_rank#egg=leaderboard-2.3.0'
+            'https://github.com/simonz05/leaderboard-python/tarball/remove_members_outside_rank#egg=leaderboard-2.3.0dev'
         ],
         install_requires=[
             'redis',
-            'leaderboard'],
+            'leaderboard >= 2.3.0dev'],
         cmdclass=cmdclass,
         features=features,
         test_suite="nose.collector",
