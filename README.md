@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/simonz05/activity-feed.png?branch=master)](https://travis-ci.org/simonz05/activity-feed)
 # ActivityFeed
 
 Activity feeds backed by Redis. Activity feeds may also be
