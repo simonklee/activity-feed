@@ -70,7 +70,7 @@ def run_setup(with_binary):
         ],
         install_requires=[
             'redis',
-            'leaderboard >= 2.3.0'],
+            'leaderboard'],
         cmdclass=cmdclass,
         features=features,
         test_suite="nose.collector",
