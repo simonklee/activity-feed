@@ -56,8 +56,8 @@ def run_setup(with_binary):
         features['speedups'] = speedups
 
     setup(
-        name='ActivityFeed',
-        version='2.6.1',
+        name='activity-feed',
+        version='2.6.2',
         license='MIT',
         url='https://github.com/simonz05/activity-feed/',
         author='Simon Zimmermann',
