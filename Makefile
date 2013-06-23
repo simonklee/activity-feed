@@ -19,6 +19,9 @@ activity_feed/_utils_speedups.so: activity_feed/_utils_speedups.pyx
 	python setup.py build
 	cp build/*/activity_feed/_utils_speedups*.so activity_feed
 	
+pypi-upload:
+	python setup.py sdist --formats=gztar upload
+
 cybuild: activity_feed/_utils_speedups.so
 
-.PHONY: test clean-pyc cybuild all
+.PHONY: test clean-pyc cybuild pypi-upload all
