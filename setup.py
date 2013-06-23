@@ -57,7 +57,7 @@ def run_setup(with_binary):
 
     setup(
         name='activity-feed',
-        version='2.6.3',
+        version='2.6.4',
         license='MIT',
         url='https://github.com/simonz05/activity-feed/',
         author='Simon Zimmermann',
@@ -68,7 +68,7 @@ def run_setup(with_binary):
         platforms='any',
         packages=['activity_feed'],
         dependency_links=[
-            'https://github.com/simonz05/leaderboard-python/tarball/remove_members_outside_rank#egg=leaderboard-2.3.0'
+            'https://github.com/simonz05/leaderboard-python/tarball/master#egg=leaderboard-2.4.0'
         ],
         install_requires=[
             'redis',
