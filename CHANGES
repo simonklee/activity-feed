@@ -1,6 +1,13 @@
 Activity Feed Changelog
 =======================
 
+Version 2.6.x
+-------------
+
+  - Add optional `page_size` argument to `ActivityFeed.feed()` method.
+  - Rename project install name ActivityFeed -> activity-feed.
+
+
 Version 2.5.4
 -------------
 
