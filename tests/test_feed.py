@@ -16,6 +16,11 @@ class FeedTest(BaseTest):
         self.assertEqual(int(feed[0]), 5)
         self.assertEqual(int(feed[4]), 1)
 
+        feed = self.a.feed('david', 1, page_size=3)
+        self.assertEqual(len(feed), 3)
+        feed = self.a.feed('david', 2, page_size=3)
+        self.assertEqual(len(feed), 2)
+
     def feed_aggregation_test(self):
         'should return an aggregate activity feed with the items correctly ordered'
         self.add_items_to_feed('david', aggregate=True)

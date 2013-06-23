@@ -55,7 +55,7 @@ class ActivityFeed(object):
 
         return items
 
-    def feed(self, user_id, page, aggregate=None):
+    def feed(self, user_id, page, aggregate=None, page_size=None):
         """Retrieve a page from the activity feed for a given `user_id`. You
         can configure `ActivityFeed.item_loader` with a Proc to retrieve an
         item from, for example, your ORM (e.g. ActiveRecord) or your ODM (e.g.
@@ -66,6 +66,9 @@ class ActivityFeed(object):
         :param page: [int] Page in the feed to be retrieved.
         :param aggregate: [boolean, False] Whether to retrieve
                           the aggregate feed for `user_id`.
+        :param page_size: [int, None] Page size to be used in fetching the
+                          activity feed. If None default page for this object
+                          will be used.
 
         @return page from the activity feed for a given `user_id`.
         """
@@ -73,7 +76,8 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.leaders(page, page_size=self.page_size, members_only=True)
+        res = feederboard.leaders(page, page_size=page_size or self.page_size,
+            members_only=True)
         return self._parse_feed_response(res)
 
     def full_feed(self, user_id, aggregate=None):
@@ -92,7 +96,8 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.leaders(1, page_size=feederboard.total_members(), members_only=True)
+        res = feederboard.leaders(1, page_size=feederboard.total_members(),
+            members_only=True)
         return self._parse_feed_response(res)
 
     def feed_between_timestamps(self, user_id, starting_timestamp,
@@ -118,10 +123,11 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         feederboard = self.feederboard_for(user_id, aggregate)
-        res = feederboard.members_from_score_range(starting_timestamp, ending_timestamp, members_only=True)
+        res = feederboard.members_from_score_range(starting_timestamp,
+                ending_timestamp, members_only=True)
         return self._parse_feed_response(res)
 
-    def total_pages_in_feed(self, user_id, aggregate = None, page_size = None):
+    def total_pages_in_feed(self, user_id, aggregate = None, page_size=None):
         """Return the total number of pages in the activity feed.
 
         :param user_id: [string] User ID.
@@ -136,11 +142,9 @@ class ActivityFeed(object):
         if aggregate is None:
             aggregate = self.aggregate
 
-        if page_size is None:
-            page_size = self.page_size
-
         feed = self.feederboard_for(user_id, aggregate)
-        return feed.total_pages_in(self.feed_key(user_id, aggregate), page_size)
+        return feed.total_pages_in(self.feed_key(user_id, aggregate),
+            page_size or self.page_size)
 
     total_pages = total_pages_in_feed
 
