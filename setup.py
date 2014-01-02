@@ -67,12 +67,9 @@ def run_setup(with_binary):
         keywords="redis",
         platforms='any',
         packages=['activity_feed'],
-        dependency_links=[
-            'https://github.com/simonz05/leaderboard-python/tarball/master#egg=leaderboard-2.4.0'
-        ],
         install_requires=[
             'redis',
-            'leaderboard'],
+            'leaderboard==2.4.0'],
         cmdclass=cmdclass,
         features=features,
         test_suite="nose.collector",
