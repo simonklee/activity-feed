@@ -69,7 +69,7 @@ def run_setup(with_binary):
         packages=['activity_feed'],
         install_requires=[
             'redis',
-            'leaderboard==2.4.0'],
+            'leaderboard>=2.4.0,<=2.6.0'],
         cmdclass=cmdclass,
         features=features,
         test_suite="nose.collector",
