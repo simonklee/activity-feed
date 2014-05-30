@@ -64,6 +64,23 @@ class FeedTest(BaseTest):
         self.assertEqual(int(feed[0]), 4)
         self.assertEqual(int(feed[1]), 3)
 
+    def between_test(self):
+        '''Should return activity feed items between the starting and ending
+        timestamps.'''
+        self.a.update_item('david', 1, timestamp(2012, 6, 19, 4, 0, 0))
+        self.a.update_item('david', 2, timestamp(2012, 6, 19, 4, 30, 0))
+        self.a.update_item('david', 3, timestamp(2012, 6, 19, 5, 30, 0))
+        self.a.update_item('david', 4, timestamp(2012, 6, 19, 6, 37, 0))
+        self.a.update_item('david', 5, timestamp(2012, 6, 19, 8, 17, 0))
+
+        from_t = timestamp(2012, 6, 19, 4, 43, 0)
+        to_t = timestamp(2012, 6, 19, 8, 16, 0)
+        feed = self.a.between('david', from_t, to_t)
+
+        self.assertEqual(len(feed), 2)
+        self.assertEqual(int(feed[0]), 4)
+        self.assertEqual(int(feed[1]), 3)
+
     def feed_between_timestamps_aggregation_test(self):
         '''Should return activity feed items between the starting and ending
         timestamps.'''
@@ -76,6 +93,23 @@ class FeedTest(BaseTest):
         from_t = timestamp(2012, 6, 19, 4, 43, 0)
         to_t = timestamp(2012, 6, 19, 8, 16, 0)
         feed = self.a.feed_between_timestamps('david', from_t, to_t, True)
+
+        self.assertEqual(len(feed), 2)
+        self.assertEqual(int(feed[0]), 4)
+        self.assertEqual(int(feed[1]), 3)
+
+    def between_aggregation_test(self):
+        '''Should return activity feed items between the starting and ending
+        timestamps.'''
+        self.a.update_item('david', 1, timestamp(2012, 6, 19, 4, 0, 0), True)
+        self.a.update_item('david', 2, timestamp(2012, 6, 19, 4, 30, 0), True)
+        self.a.update_item('david', 3, timestamp(2012, 6, 19, 5, 30, 0), True)
+        self.a.update_item('david', 4, timestamp(2012, 6, 19, 6, 37, 0), True)
+        self.a.update_item('david', 5, timestamp(2012, 6, 19, 8, 17, 0), True)
+
+        from_t = timestamp(2012, 6, 19, 4, 43, 0)
+        to_t = timestamp(2012, 6, 19, 8, 16, 0)
+        feed = self.a.between('david', from_t, to_t, True)
 
         self.assertEqual(len(feed), 2)
         self.assertEqual(int(feed[0]), 4)
@@ -147,6 +181,22 @@ class FeedTest(BaseTest):
         self.assertEqual(int(feed[0]), 5)
         self.assertEqual(int(feed[1]), 1)
 
+    def trim_test(self):
+        '''should trim activity feed items between the starting and ending
+        timestamps'''
+        self.a.update_item('david', 1, timestamp(2012, 6, 19, 4, 0, 0))
+        self.a.update_item('david', 2, timestamp(2012, 6, 19, 4, 30, 0))
+        self.a.update_item('david', 3, timestamp(2012, 6, 19, 5, 30, 0))
+        self.a.update_item('david', 4, timestamp(2012, 6, 19, 6, 37, 0))
+        self.a.update_item('david', 5, timestamp(2012, 6, 19, 8, 17, 0))
+
+        self.a.trim('david', timestamp(2012, 6, 19, 4, 29, 0), timestamp(2012, 6, 19, 8, 16, 0))
+
+        feed = self.a.feed('david', 1)
+        self.assertEqual(len(feed), 2)
+        self.assertEqual(int(feed[0]), 5)
+        self.assertEqual(int(feed[1]), 1)
+
     def trim_feed_aggregation_test(self):
         '''should trim activity feed items between the starting and ending
         timestamps'''
@@ -206,11 +256,33 @@ class FeedTest(BaseTest):
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
         self.assertEqual(1 < ttl <= 10, True)
 
+    def expire_in_test(self):
+        'should set an expiration on an activity feed'
+        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.a.expire_in('david', 10)
+        ttl = self.a.redis.ttl(self.a.feed_key('david'))
+        self.assertEqual(1 < ttl <= 10, True)
+
+    def expire_feed_in_test(self):
+        'should set an expiration on an activity feed'
+        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.a.expire_feed_in('david', 10)
+        ttl = self.a.redis.ttl(self.a.feed_key('david'))
+        self.assertEqual(1 < ttl <= 10, True)
+
     def expire_feed_at_test(self):
         'should set an expiration timestamp on an activity feed.'
         self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
         t = datetime.datetime.now() + datetime.timedelta(seconds=10)
         self.a.expire_feed_at('david', datetime_to_timestamp(t))
+        ttl = self.a.redis.ttl(self.a.feed_key('david'))
+        self.assertEqual(1 < ttl <= 10, True)
+
+    def expire_at_test(self):
+        'should set an expiration timestamp on an activity feed.'
+        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        t = datetime.datetime.now() + datetime.timedelta(seconds=10)
+        self.a.expire_at('david', datetime_to_timestamp(t))
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
         self.assertEqual(1 < ttl <= 10, True)
 

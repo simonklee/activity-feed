@@ -127,7 +127,9 @@ class ActivityFeed(object):
                 ending_timestamp, members_only=True)
         return self._parse_feed_response(res)
 
-    def total_pages_in_feed(self, user_id, aggregate = None, page_size=None):
+    between = feed_between_timestamps
+
+    def total_pages_in_feed(self, user_id, aggregate=None, page_size=None):
         """Return the total number of pages in the activity feed.
 
         :param user_id: [string] User ID.
@@ -148,7 +150,7 @@ class ActivityFeed(object):
 
     total_pages = total_pages_in_feed
 
-    def total_items_in_feed(self, user_id, aggregate = None):
+    def total_items_in_feed(self, user_id, aggregate=None):
         """Return the total number of items in the activity feed.
 
         :param user_id: [string] User ID.
@@ -193,7 +195,9 @@ class ActivityFeed(object):
         feed = self.feederboard_for(user_id, aggregate)
         feed.remove_members_in_score_range(starting_timestamp, ending_timestamp)
 
-    def trim_feed_to_size(self, user_id, size, aggregate = None):
+    trim = trim_feed
+
+    def trim_feed_to_size(self, user_id, size, aggregate=None):
         """Trim an activity down to a certain size
 
         :param user_id: [string] User ID.
@@ -207,7 +211,7 @@ class ActivityFeed(object):
         feed = self.feederboard_for(user_id, aggregate)
         return feed.remove_members_outside_rank(size)
 
-    def expire_feed(self, user_id, seconds, aggregate = None):
+    def expire_feed(self, user_id, seconds, aggregate=None):
         """Expire an activity feed after a set number of seconds.
 
         :param user_id: [string] User ID.
@@ -220,6 +224,9 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         self.redis.expire(self.feed_key(user_id, aggregate), seconds)
+
+    expire_in = expire_feed
+    expire_feed_in = expire_feed
 
     def expire_feed_at(self, user_id, timestamp, aggregate=None):
         """Expire an activity feed at a given timestamp.
@@ -234,6 +241,8 @@ class ActivityFeed(object):
             aggregate = self.aggregate
 
         self.redis.expireat(self.feed_key(user_id, aggregate), timestamp)
+
+    expire_at = expire_feed_at
 
     def update_item(self, user_id, item_id, timestamp, aggregate=None):
         """Add or update an item in the activity feed for a given `user_id`.
@@ -294,7 +303,7 @@ class ActivityFeed(object):
             feederboard = self.feederboard_for(user_id, True)
             feederboard.remove_member(_id)
 
-    def check_item(self, user_id, item_id, aggregate = None):
+    def check_item(self, user_id, item_id, aggregate=None):
         """Check to see if an item is in the activity feed for a given `user_id`.
 
         :param user_id [string] User ID.
