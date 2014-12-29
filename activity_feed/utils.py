@@ -9,6 +9,11 @@ try:
 except ImportError:
     pass
 
+try:
+    basestring
+except:
+    basestring = str
+
 def s(color='NoColor'):
     BdbQuit_excepthook.excepthook_ori = sys.excepthook
     Pdb(color).set_trace(sys._getframe().f_back)
@@ -17,8 +22,8 @@ def timeit(method):
     def wrapper(*args, **kw):
         t = time.time()
         result = method(*args, **kw)
-        print '%r (%r, %r) %2.3f sec' % \
-              (method.__name__, args, kw, time.time() - t)
+        print(('%r (%r, %r) %2.3f sec' % \
+              (method.__name__, args, kw, time.time() - t)))
         return result
     return wrapper
 
@@ -171,9 +176,9 @@ def import_string(import_name, silent=False):
             modname = module + '.' + obj
             __import__(modname)
             return sys.modules[modname]
-    except ImportError, e:
+    except ImportError as e:
         if not silent:
-            raise ImportStringError(import_name, e), None, sys.exc_info()[2]
+            raise ImportStringError(import_name, e).with_traceback(sys.exc_info()[2])
 
 def get_root_path(import_name):
     """Returns the path to a package or cwd if that cannot be found.  This

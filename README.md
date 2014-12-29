@@ -22,6 +22,8 @@ To install ActivityFeed:
 
 `$ pip install activity-feed`
 
+For Python 3 support, you must make sure leaderboards >= 3.0.0 is installed.
+
 ## Usage
 
 Import the ActivityFeed library:

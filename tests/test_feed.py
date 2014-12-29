@@ -2,7 +2,12 @@
 from __future__ import absolute_import
 
 import datetime
-import leaderboard
+
+try:
+    from leaderboard.leaderboard import Leaderboard
+except ImportError:
+    from leaderboard import Leaderboard
+
 from tests.helper import BaseTest, timestamp
 
 from activity_feed.utils import datetime_to_timestamp
@@ -117,14 +122,14 @@ class FeedTest(BaseTest):
 
     def total_pages_in_feed_test(self):
         'should return the correct number of pages in the activity feed'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE + 1)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE + 1)
 
         self.assertEqual(self.a.total_pages_in_feed('david'), 2)
         self.assertEqual(self.a.total_pages('david'), 2)
 
     def total_pages_in_feed_aggregation_test(self):
         'should return the correct number of pages in the aggregate activity feed'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE + 1, True)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE + 1, True)
 
         self.assertEqual(self.a.total_pages_in_feed('david', True), 2)
         self.assertEqual(self.a.total_pages('david', True), 2)
@@ -138,7 +143,7 @@ class FeedTest(BaseTest):
 
     def remove_feeds_test(self):
         'should remove the activity feeds for a given user ID'
-        page_size = leaderboard.Leaderboard.DEFAULT_PAGE_SIZE + 1
+        page_size = Leaderboard.DEFAULT_PAGE_SIZE + 1
         self.add_items_to_feed('david', page_size)
 
         self.assertEqual(self.a.total_items_in_feed('david'), page_size)
@@ -151,7 +156,7 @@ class FeedTest(BaseTest):
 
     def total_items_in_feed_test(self):
         'should return the correct number of items in the activity feed'
-        page_size = leaderboard.Leaderboard.DEFAULT_PAGE_SIZE + 1
+        page_size = Leaderboard.DEFAULT_PAGE_SIZE + 1
         self.add_items_to_feed('david', page_size)
 
         self.assertEqual(self.a.total_items_in_feed('david'), page_size)
@@ -159,7 +164,7 @@ class FeedTest(BaseTest):
 
     def total_items_in_feed_aggregation_test(self):
         'should return the correct number of items in the aggregate activity feed'
-        page_size = leaderboard.Leaderboard.DEFAULT_PAGE_SIZE + 1
+        page_size = Leaderboard.DEFAULT_PAGE_SIZE + 1
         self.add_items_to_feed('david', page_size, True)
 
         self.assertEqual(self.a.total_items_in_feed('david', True), page_size)
@@ -215,7 +220,7 @@ class FeedTest(BaseTest):
 
     def trim_feed_to_size_test(self):
         '''should trim activity feed down to a size'''
-        page_size = leaderboard.Leaderboard.DEFAULT_PAGE_SIZE
+        page_size = Leaderboard.DEFAULT_PAGE_SIZE
         self.add_items_to_feed('david', page_size)
 
         feed = self.a.feed('david', 1)
@@ -232,7 +237,7 @@ class FeedTest(BaseTest):
 
     def trim_feed_to_size_aggregation_test(self):
         '''should trim activity feed down to a size'''
-        page_size = leaderboard.Leaderboard.DEFAULT_PAGE_SIZE
+        page_size = Leaderboard.DEFAULT_PAGE_SIZE
         self.add_items_to_feed('david', page_size, True)
 
         feed = self.a.feed('david', 1, True)
@@ -251,28 +256,28 @@ class FeedTest(BaseTest):
 
     def expire_feed_test(self):
         'should set an expiration on an activity feed'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE)
         self.a.expire_feed('david', 10)
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
         self.assertEqual(1 < ttl <= 10, True)
 
     def expire_in_test(self):
         'should set an expiration on an activity feed'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE)
         self.a.expire_in('david', 10)
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
         self.assertEqual(1 < ttl <= 10, True)
 
     def expire_feed_in_test(self):
         'should set an expiration on an activity feed'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE)
         self.a.expire_feed_in('david', 10)
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
         self.assertEqual(1 < ttl <= 10, True)
 
     def expire_feed_at_test(self):
         'should set an expiration timestamp on an activity feed.'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE)
         t = datetime.datetime.now() + datetime.timedelta(seconds=10)
         self.a.expire_feed_at('david', datetime_to_timestamp(t))
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
@@ -280,7 +285,7 @@ class FeedTest(BaseTest):
 
     def expire_at_test(self):
         'should set an expiration timestamp on an activity feed.'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE)
         t = datetime.datetime.now() + datetime.timedelta(seconds=10)
         self.a.expire_at('david', datetime_to_timestamp(t))
         ttl = self.a.redis.ttl(self.a.feed_key('david'))

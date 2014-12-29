@@ -1,4 +1,8 @@
-import urlparse
+try:
+  import urllib.parse as urlparse
+except ImportError:
+  import urlparse
+
 import redis
 
 try:

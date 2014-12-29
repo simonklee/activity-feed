@@ -50,6 +50,14 @@ if os.path.isfile('activity_feed/_utils_speedups.c') and not hasattr(sys, "pypy_
 else:
     speedups = None
 
+
+requirements = ['redis']
+if sys.version_info.major == 3:
+    requirements.append('leaderboards>=3.0.1')
+else:
+    requirements.extend(['leaderboards>=2.4.0,<=2.6.0'])
+
+
 def run_setup(with_binary):
     features = {}
     if with_binary and speedups is not None:
@@ -67,9 +75,7 @@ def run_setup(with_binary):
         keywords="redis",
         platforms='any',
         packages=['activity_feed'],
-        install_requires=[
-            'redis',
-            'leaderboard>=2.4.0,<=2.6.0'],
+        install_requires=requirements,
         cmdclass=cmdclass,
         features=features,
         test_suite="nose.collector",

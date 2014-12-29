@@ -118,9 +118,9 @@ if __name__ == '__main__':
         res = timeit.Timer(example_timeit_run).repeat(7, number)
         min_run = min(res)
         per_loop = min_run/number
-        print u'{} total run'.format(format_time(min_run))
-        print u'{} per/loop'.format(format_time(per_loop))
-        print u'{} per/friend'.format(format_time(per_loop/friends_count))
+        print((u'{} total run'.format(format_time(min_run))))
+        print((u'{} per/loop'.format(format_time(per_loop))))
+        print((u'{} per/friend'.format(format_time(per_loop/friends_count))))
     else:
         for _ in xrange(100):
             example_timeit_run()
