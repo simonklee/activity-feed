@@ -1,20 +1,56 @@
 language: python
-python:
-  - "2.7"
 install:
   # this fixes SemLock issues on travis
   - "pip install cython"
   - "make test_setup"
   - "pip install redis leaderboard==$LEADERBOARD_VERSION"
   - "pip install . --no-deps"
-env:
-  matrix: 
-    - COMMAND="make test" $LEADERBOARD_VERSION="2.4.0"
-    - COMMAND="make cybuild test" $LEADERBOARD_VERSION="2.4.0"
-    - COMMAND="make test" $LEADERBOARD_VERSION="2.5.0"
-    - COMMAND="make cybuild test" $LEADERBOARD_VERSION="2.5.0"
-    - COMMAND="make test" $LEADERBOARD_VERSION="2.6.0"
-    - COMMAND="make cybuild test" $LEADERBOARD_VERSION="2.6.0"
 services:
   - redis-server
 script: "$COMMAND"
+matrix:
+  include:
+    - python: 2.7
+      env: COMMAND="make test" LEADERBOARD_VERSION=2.4.0
+    - python: 2.7
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=2.4.0
+    - python: 2.7
+      env: COMMAND="make test" LEADERBOARD_VERSION=2.5.0
+    - python: 2.7
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=2.5.0
+    - python: 2.7
+      env: COMMAND="make test" LEADERBOARD_VERSION=2.6.0
+    - python: 2.7
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=2.6.0
+    - python: 2.7
+      env: COMMAND="make test" LEADERBOARD_VERSION=3.0.1
+    - python: 2.7
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=3.0.1
+    - python: 2.7
+      env: COMMAND="make test" LEADERBOARD_VERSION=3.1.0
+    - python: 2.7
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=3.1.0
+    - python: 3.2
+      env: COMMAND="make test" LEADERBOARD_VERSION=3.0.1
+    - python: 3.2
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=3.0.1
+    - python: 3.2
+      env: COMMAND="make test" LEADERBOARD_VERSION=3.1.0
+    - python: 3.2
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=3.1.0
+    - python: 3.3
+      env: COMMAND="make test" LEADERBOARD_VERSION=3.0.1
+    - python: 3.3
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=3.0.1
+    - python: 3.3
+      env: COMMAND="make test" LEADERBOARD_VERSION=3.1.0
+    - python: 3.3
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=3.1.0
+    - python: 3.4
+      env: COMMAND="make test" LEADERBOARD_VERSION=3.0.1
+    - python: 3.4
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=3.0.1
+    - python: 3.4
+      env: COMMAND="make test" LEADERBOARD_VERSION=3.1.0
+    - python: 3.4
+      env: COMMAND="make cybuild test" LEADERBOARD_VERSION=3.1.0
