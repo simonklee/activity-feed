@@ -258,14 +258,14 @@ class FeedTest(BaseTest):
 
     def expire_in_test(self):
         'should set an expiration on an activity feed'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE)
         self.a.expire_in('david', 10)
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
         self.assertEqual(1 < ttl <= 10, True)
 
     def expire_feed_in_test(self):
         'should set an expiration on an activity feed'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE)
         self.a.expire_feed_in('david', 10)
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
         self.assertEqual(1 < ttl <= 10, True)
@@ -280,7 +280,7 @@ class FeedTest(BaseTest):
 
     def expire_at_test(self):
         'should set an expiration timestamp on an activity feed.'
-        self.add_items_to_feed('david', leaderboard.Leaderboard.DEFAULT_PAGE_SIZE)
+        self.add_items_to_feed('david', Leaderboard.DEFAULT_PAGE_SIZE)
         t = datetime.datetime.now() + datetime.timedelta(seconds=10)
         self.a.expire_at('david', datetime_to_timestamp(t))
         ttl = self.a.redis.ttl(self.a.feed_key('david'))
