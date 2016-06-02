@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-import leaderboard
+from leaderboard.leaderboard import Leaderboard
 
 try:
     from ._utils_speedups import isiterable
@@ -340,5 +340,5 @@ class ActivityFeed(object):
         if aggregate is None:
             aggregate = self.aggregate
 
-        return leaderboard.Leaderboard(self.feed_key(user_id, aggregate),
+        return Leaderboard(self.feed_key(user_id, aggregate),
             connection_pool=self.redis.connection_pool)

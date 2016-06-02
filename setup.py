@@ -57,7 +57,7 @@ def run_setup(with_binary):
 
     setup(
         name='activity-feed',
-        version='2.6.4',
+        version='2.7.0',
         license='MIT',
         url='https://github.com/simonz05/activity-feed/',
         author='Simon Zimmermann',
@@ -69,7 +69,7 @@ def run_setup(with_binary):
         packages=['activity_feed'],
         install_requires=[
             'redis',
-            'leaderboard>=2.4.0,<=2.6.0'],
+            'leaderboard>=3.5.0'],
         cmdclass=cmdclass,
         features=features,
         test_suite="nose.collector",

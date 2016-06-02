@@ -9,12 +9,8 @@ install:
   - "pip install . --no-deps"
 env:
   matrix: 
-    - COMMAND="make test" $LEADERBOARD_VERSION="2.4.0"
-    - COMMAND="make cybuild test" $LEADERBOARD_VERSION="2.4.0"
-    - COMMAND="make test" $LEADERBOARD_VERSION="2.5.0"
-    - COMMAND="make cybuild test" $LEADERBOARD_VERSION="2.5.0"
-    - COMMAND="make test" $LEADERBOARD_VERSION="2.6.0"
-    - COMMAND="make cybuild test" $LEADERBOARD_VERSION="2.6.0"
+    - COMMAND="make test" $LEADERBOARD_VERSION="3.5.0"
+    - COMMAND="make cybuild test" $LEADERBOARD_VERSION="3.5.0"
 services:
   - redis-server
 script: "$COMMAND"

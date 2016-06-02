@@ -5,6 +5,9 @@ clean-pyc:
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 
+clean-so:
+	find . -name '*.so' -exec rm -f {} +
+
 test:
 	@nosetests -s -w tests
 
@@ -22,6 +25,6 @@ activity_feed/_utils_speedups.so: activity_feed/_utils_speedups.pyx
 pypi-upload:
 	python setup.py sdist --formats=gztar upload
 
-cybuild: activity_feed/_utils_speedups.so
+cybuild: clean-so activity_feed/_utils_speedups.so
 
-.PHONY: test clean-pyc cybuild pypi-upload all
+.PHONY: test clean-pyc clean-so cybuild pypi-upload all
